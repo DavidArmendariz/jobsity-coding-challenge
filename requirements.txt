@@ -1,3 +1,6 @@
 flask
 autopep8
 python-dotenv
+flask-wtf
+flask-sqlalchemy
+flask-migrate

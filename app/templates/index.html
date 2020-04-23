@@ -1,0 +1,7 @@
+{% extends "base.html" %} {% block content %}
+<h1>Welcome to the chatroom, {{ user.username }}!</h1>
+{% for message in messages %}
+<div>
+  <p><b>{{ message.user.username }}:</b> {{ message.body }}</p>
+</div>
+{% endfor %} {% endblock %}
