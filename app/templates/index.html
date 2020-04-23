@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% block content %}
-<h1>Welcome to the chatroom, {{ user.username }}!</h1>
+<h1>Welcome to the chatroom, {{ current_user.username }}!</h1>
 {% for message in messages %}
 <div>
   <p><b>{{ message.user.username }}:</b> {{ message.body }}</p>
