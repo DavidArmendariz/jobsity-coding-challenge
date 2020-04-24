@@ -7,8 +7,10 @@ from flask_login import logout_user
 from flask_login import login_required
 from werkzeug.urls import url_parse
 from flask_socketio import SocketIO
+from chatbot.validations import command_is_valid
 
 
+@app.route('/')
 @app.route('/lobby')
 @login_required
 def lobby():
@@ -27,7 +29,6 @@ def chatroom(chatroom_name):
                            chatroom=chatroom.chatroom_name)
 
 
-@app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -70,10 +71,10 @@ def register():
 @socketio.on('receive message')
 def handle_message(message, methods=['GET', 'POST']):
     print(message)
-    text = message["message"]
+    text = message['message']
     chatroom = Chatroom.query.filter_by(
-        chatroom_name=message["chatroom"]).first()
-    response = {"username": current_user.username, "body": text}
+        chatroom_name=message['chatroom']).first()
+    response = {'username': current_user.username, 'body': text}
     socketio.emit('message response', response)
     message = Message(body=text, user=current_user, chatroom=chatroom)
     db.session.add(message)
@@ -82,9 +83,12 @@ def handle_message(message, methods=['GET', 'POST']):
 
 @socketio.on('receive command')
 def handle_command(message, methods=['GET', 'POST']):
-    stock_code = message["message"].split("=")[1]
-    print(stock_code)
-    data_from_stooq = stock_rpc_client.call(stock_code)
-    response = {"username": "Bot",
-                "body": f"{stock_code} quote is ${data_from_stooq} per share."}
+    command = message['message']
+    if command_is_valid(command):
+        stock_code = command.split('=')[1]
+        body = stock_rpc_client.call(stock_code)
+    else:
+        body = 'Invalid command. Check that it matches the syntax "/stock=stock_code"'
+    response = {'username': 'Bot',
+                'body': body}
     socketio.emit('command response', response)

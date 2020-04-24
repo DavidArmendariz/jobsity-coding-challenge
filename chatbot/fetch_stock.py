@@ -1,5 +1,6 @@
 import csv
 import requests
+from validations import fetch_stock_response
 
 
 def fetch_stock(stock_code):
@@ -11,4 +12,4 @@ def fetch_stock(stock_code):
         decoded_content = download.content.decode('utf-8')
         content = csv.reader(decoded_content.splitlines(), delimiter=',')
         data = list(content)[1]
-    return data[6]
+    return fetch_stock_response(stock_decoded, data[6])
