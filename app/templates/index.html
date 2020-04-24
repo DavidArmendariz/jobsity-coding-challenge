@@ -29,26 +29,35 @@
     const form = $("form").on("submit", function (event) {
       event.preventDefault();
       const message = $("input.message").val();
-      socket.emit("receive message", {
+      let eventOption = "receive message";
+      if (message.startsWith("/")) {
+        eventOption = "receive command";
+      }
+      socket.emit(eventOption, {
         message,
       });
       $("input.message").val("").focus();
     });
   });
   let numberOfMessages = 0;
-  socket.on("my response", function (message) {
+  socket.on("message response", function (message) {
     if (typeof message.username !== "undefined") {
       $("div.messages").append(
-        '<p class="message"><b>' +
-          message.username +
-          ": </b>" +
-          message.body +
-          "</p>"
+        "<p><b>" + message.username + ": </b>" + message.body + "</p>"
       );
       numberOfMessages++;
       if (numberOfMessages > 50) {
         $("div.messages > p:first").remove();
       }
+    }
+  });
+  socket.on("command response", function (message) {
+    $("div.messages").append(
+      "<p><b>" + message.username + ": </b>" + message.body + "</p>"
+    );
+    numberOfMessages++;
+    if (numberOfMessages > 50) {
+      $("div.messages > p:first").remove();
     }
   });
 </script>

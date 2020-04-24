@@ -1,5 +1,5 @@
 from flask import render_template, flash, redirect, url_for, request
-from app import app, db
+from app import app, db, socketio, stock_rpc_client
 from app.forms import LoginForm, RegistrationForm
 from flask_login import current_user, login_user
 from app.models import User, Message
@@ -7,7 +7,6 @@ from flask_login import logout_user
 from flask_login import login_required
 from werkzeug.urls import url_parse
 from flask_socketio import SocketIO
-from app import socketio
 
 
 @app.route('/')
@@ -56,12 +55,19 @@ def register():
         return redirect(url_for('login'))
     return render_template('registration.html', title='Register', form=form)
 
-
-def messageReceived(methods=['GET', 'POST']):
-    print('message was received!')
-
-
 @socketio.on('receive message')
 def handle_message(message, methods=['GET', 'POST']):
-    response = {"username": current_user.username, "body": message["message"]}
-    socketio.emit('my response', response, callback=messageReceived)
+    text = message["message"]
+    response = {"username": current_user.username, "body": text}
+    socketio.emit('message response', response)
+    message = Message(body=text, user=current_user)
+    db.session.add(message)
+    db.session.commit()
+
+@socketio.on('receive command')
+def handle_command(message, methods=['GET', 'POST']):
+    stock_code = message["message"].split("=")[1]
+    print(stock_code)
+    data_from_stooq = stock_rpc_client.call(stock_code)
+    response = {"username": "Bot", "body": f"{stock_code} quote is ${data_from_stooq} per share."}
+    socketio.emit('command response', response)
