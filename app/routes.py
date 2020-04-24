@@ -2,27 +2,19 @@ from flask import render_template, flash, redirect, url_for, request
 from app import app, db
 from app.forms import LoginForm, RegistrationForm
 from flask_login import current_user, login_user
-from app.models import User
+from app.models import User, Message
 from flask_login import logout_user
 from flask_login import login_required
 from werkzeug.urls import url_parse
+from flask_socketio import SocketIO
+from app import socketio
 
 
 @app.route('/')
 @app.route('/index')
 @login_required
 def index():
-    user = {'username': 'David'}
-    messages = [
-        {
-            'user': {'username': 'David'},
-            'body': 'Hola Diana!'
-        },
-        {
-            'user': {'username': 'Diana'},
-            'body': 'Hola David!'
-        }
-    ]
+    messages = Message.query.order_by(Message.timestamp).limit(50).all()
     return render_template('index.html', title='Chat Room', messages=messages)
 
 
@@ -63,3 +55,13 @@ def register():
         flash('You signed up successfully! Login with your new credentials.')
         return redirect(url_for('login'))
     return render_template('registration.html', title='Register', form=form)
+
+
+def messageReceived(methods=['GET', 'POST']):
+    print('message was received!')
+
+
+@socketio.on('receive message')
+def handle_message(message, methods=['GET', 'POST']):
+    response = {"username": current_user.username, "body": message["message"]}
+    socketio.emit('my response', response, callback=messageReceived)
