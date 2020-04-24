@@ -9,11 +9,11 @@ from werkzeug.urls import url_parse
 from flask_socketio import SocketIO
 
 
-@app.route('/')
-@app.route('/index')
+@app.route('/lobby')
 @login_required
 def lobby():
-    chatrooms = list(map(lambda chatroom: chatroom.chatroom_name, Chatroom.query.all()))
+    chatrooms = list(
+        map(lambda chatroom: chatroom.chatroom_name, Chatroom.query.all()))
     return render_template('lobby.html', title='Lobby', chatrooms=chatrooms)
 
 
@@ -24,13 +24,14 @@ def chatroom(chatroom_name):
     messages = Message.query.filter_by(chatroom_id=chatroom.id)\
         .order_by(Message.timestamp).limit(50).all()
     return render_template('chatroom.html', title=chatroom.chatroom_name, messages=messages,
-    chatroom=chatroom.chatroom_name)
+                           chatroom=chatroom.chatroom_name)
 
 
+@app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('lobby'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
@@ -40,7 +41,7 @@ def login():
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('index')
+            next_page = url_for('lobby')
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
 
@@ -48,13 +49,13 @@ def login():
 @app.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('login'))
     form = RegistrationForm()
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
@@ -70,7 +71,8 @@ def register():
 def handle_message(message, methods=['GET', 'POST']):
     print(message)
     text = message["message"]
-    chatroom = Chatroom.query.filter_by(chatroom_name=message["chatroom"]).first()
+    chatroom = Chatroom.query.filter_by(
+        chatroom_name=message["chatroom"]).first()
     response = {"username": current_user.username, "body": text}
     socketio.emit('message response', response)
     message = Message(body=text, user=current_user, chatroom=chatroom)
