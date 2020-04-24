@@ -7,7 +7,8 @@ from flask_login import logout_user
 from flask_login import login_required
 from werkzeug.urls import url_parse
 from flask_socketio import SocketIO
-from chatbot.validations import command_is_valid
+from chatbot.validations import command_is_valid, stock_response
+import threading
 
 
 @app.route('/')
@@ -70,23 +71,26 @@ def register():
 
 @socketio.on('receive message')
 def handle_message(message, methods=['GET', 'POST']):
-    print(message)
     text = message['message']
-    chatroom = Chatroom.query.filter_by(
-        chatroom_name=message['chatroom']).first()
     response = {'username': current_user.username, 'body': text}
     socketio.emit('message response', response)
-    message = Message(body=text, user=current_user, chatroom=chatroom)
-    db.session.add(message)
-    db.session.commit()
+
+    def save_message_to_database(message):
+        chatroom = Chatroom.query.filter_by(
+            chatroom_name=message['chatroom']).first()
+        message = Message(body=text, user=current_user, chatroom=chatroom)
+        db.session.add(message)
+        db.session.commit()
+    threading.Thread(target=save_message_to_database, args=(message,)).start()
 
 
 @socketio.on('receive command')
 def handle_command(message, methods=['GET', 'POST']):
     command = message['message']
     if command_is_valid(command):
-        stock_code = command.split('=')[1]
+        stock_code = command.split('=')[1].upper()
         body = stock_rpc_client.call(stock_code)
+        body = stock_response(stock_code, body)
     else:
         body = 'Invalid command. Check that it matches the syntax "/stock=stock_code"'
     response = {'username': 'Bot',

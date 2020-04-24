@@ -9,3 +9,4 @@ email_validator
 flask-socketio
 pika
 requests
+pytest

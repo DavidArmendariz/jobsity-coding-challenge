@@ -4,8 +4,8 @@
 
 def command_is_valid(command):
     try:
-        splitted_command = command.split("=")
-        if splitted_command[0].lower() != "/stock":
+        splitted_command = command.split('=')
+        if splitted_command[0] != '/stock':
             return False
         elif len(splitted_command) != 2:
             return False
@@ -14,8 +14,10 @@ def command_is_valid(command):
         return False
 
 
-def fetch_stock_response(stock_code, data):
-    if data == "N/D":
-        return "No information available for this stock code. Check that it is spelled correctly."
+def stock_response(stock_code, data):
+    if data == 'N/D':
+        return 'No information available for this stock code. Check that it is spelled correctly.'
+    elif data == 'error':
+        return 'Something wrong happened. Try again later.'
     else:
-        return f"{stock_code} quote is ${data} per share."
+        return f'{stock_code} quote is ${data} per share.'

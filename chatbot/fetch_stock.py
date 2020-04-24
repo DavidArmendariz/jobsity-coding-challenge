@@ -1,15 +1,19 @@
 import csv
 import requests
-from validations import fetch_stock_response
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 
 def fetch_stock(stock_code):
-    # By default, RabbitMQ sends messages as bytestring, so we have to convert the code to a regular string.
-    stock_decoded = stock_code.lower().decode("utf-8")
-    with requests.Session() as session:
-        url = f'https://stooq.com/q/l/?s={stock_decoded}&f=sd2t2ohlcv&h&e=csv'
-        download = session.get(url)
-        decoded_content = download.content.decode('utf-8')
-        content = csv.reader(decoded_content.splitlines(), delimiter=',')
-        data = list(content)[1]
-    return fetch_stock_response(stock_decoded, data[6])
+    try:
+        # By default, RabbitMQ sends messages as bytestring, so we have to convert the code to a regular string.
+        stock_decoded = stock_code.lower().decode('utf-8')
+        payload = {'s': stock_decoded,
+                   'f': 'sd2t2ohlcv', 'h': None, 'e': 'csv'}
+        response = requests.get(os.environ.get('STOOQ_URL'), params=payload)
+        close_price = list(csv.reader(response.text.strip().split('\n')))[0][6]
+        return close_price
+    except:
+        return 'error'
