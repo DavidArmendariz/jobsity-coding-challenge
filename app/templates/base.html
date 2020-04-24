@@ -9,7 +9,7 @@
   <body>
     <div>
       Financial Chat:
-      <a href="{{ url_for('index') }}">Home</a>
+      <a href="{{ url_for('lobby') }}">Lobby</a>
       {% if current_user.is_anonymous %}
       <a href="{{ url_for('login') }}">Login</a>
       {% else %}

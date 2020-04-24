@@ -33,6 +33,15 @@ class Message(db.Model):
     body = db.Column(db.String(280))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    chatroom_id = db.Column(db.Integer, db.ForeignKey('chatroom.id'))
 
     def __repr__(self):
         return f'<Message {self.body}>'
+
+class Chatroom(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    chatroom_name = db.Column(db.String(64), unique=True)
+    messages = db.relationship('Message', backref='chatroom', lazy='dynamic')
+
+    def __repr__(self):
+        return f'<Chatroom {self.chatroom_name}>'
