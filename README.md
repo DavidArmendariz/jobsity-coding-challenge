@@ -42,17 +42,9 @@ db.session.add(c)
 db.session.commit()
 ```
 
-## Database migrations
+## Tests
 
-If for some reason the migration repository or the database itself is not present, run the following command:
-
+To run all the available tests, just run:
 ```
-flask db init
-```
-
-To make the migrations and upgrade the database, run the following commands:
-
-```
-flask db migrate
-flask db upgrade
+pytest
 ```

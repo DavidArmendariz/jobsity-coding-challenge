@@ -20,7 +20,7 @@ def lobby():
     return render_template('lobby.html', title='Lobby', chatrooms=chatrooms)
 
 
-@app.route('/<chatroom_name>')
+@app.route('/chatroom/<chatroom_name>')
 @login_required
 def chatroom(chatroom_name):
     chatroom = Chatroom.query.filter_by(chatroom_name=chatroom_name).first()
