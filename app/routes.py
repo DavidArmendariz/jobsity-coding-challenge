@@ -8,7 +8,6 @@ from flask_login import login_required
 from werkzeug.urls import url_parse
 from flask_socketio import SocketIO
 from chatbot.validations import command_is_valid, stock_response
-import threading
 
 
 @app.route('/')
