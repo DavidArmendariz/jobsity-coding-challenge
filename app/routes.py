@@ -74,14 +74,11 @@ def handle_message(message, methods=['GET', 'POST']):
     text = message['message']
     response = {'username': current_user.username, 'body': text}
     socketio.emit('message response', response)
-
-    def save_message_to_database(message):
-        chatroom = Chatroom.query.filter_by(
-            chatroom_name=message['chatroom']).first()
-        message = Message(body=text, user=current_user, chatroom=chatroom)
-        db.session.add(message)
-        db.session.commit()
-    threading.Thread(target=save_message_to_database, args=(message,)).start()
+    chatroom = Chatroom.query.filter_by(
+        chatroom_name=message['chatroom']).first()
+    message = Message(body=text, user=current_user, chatroom=chatroom)
+    db.session.add(message)
+    db.session.commit()
 
 
 @socketio.on('receive command')
@@ -93,6 +90,5 @@ def handle_command(message, methods=['GET', 'POST']):
         body = stock_response(stock_code, body)
     else:
         body = 'Invalid command. Check that it matches the syntax "/stock=stock_code"'
-    response = {'username': 'Bot',
-                'body': body}
+    response = {'username': 'Bot', 'body': body}
     socketio.emit('command response', response)

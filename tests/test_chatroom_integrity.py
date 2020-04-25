@@ -7,9 +7,8 @@ import pytest
 def test_chatroom_name_is_unique():
     """
     Test idea: 
-    1. Create a chatroom called "Test chatroom" if it does not exist
-    2. Try to add another one with the same name
-    3. Check if IntegrityError is raised
+    1. Try to add a new Test Chatroom
+    2. Check if IntegrityError is raised
     """
     chatroom = Chatroom(chatroom_name="Test chatroom")
     with pytest.raises(IntegrityError):

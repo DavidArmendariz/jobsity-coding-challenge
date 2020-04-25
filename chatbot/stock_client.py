@@ -2,7 +2,7 @@ import pika
 import uuid
 
 
-class StockRPCClient(object):
+class StockRPCClient:
 
     def __init__(self):
         self.connection = pika.BlockingConnection(
@@ -19,20 +19,20 @@ class StockRPCClient(object):
             auto_ack=True)
 
     def on_response(self, ch, method, props, body):
-        if self.corr_id == props.correlation_id:
+        if self.correlation_id == props.correlation_id:
             self.response = body
 
     def call(self, stock):
         self.response = None
-        self.corr_id = str(uuid.uuid4())
+        self.correlation_id = str(uuid.uuid4())
         self.channel.basic_publish(
             exchange='',
             routing_key='rpc_stock_queue',
             properties=pika.BasicProperties(
                 reply_to=self.callback_queue,
-                correlation_id=self.corr_id,
+                correlation_id=self.correlation_id,
             ),
             body=stock)
         while self.response is None:
             self.connection.process_data_events()
-        return self.response.decode("utf-8")
+        return self.response.decode('utf-8')
