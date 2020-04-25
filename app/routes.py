@@ -85,9 +85,12 @@ def handle_message(message, methods=['GET', 'POST']):
 def handle_command(message, methods=['GET', 'POST']):
     command = message['message']
     if command_is_valid(command):
-        stock_code = command.split('=')[1].upper()
-        body = stock_rpc_client.call(stock_code)
-        body = stock_response(stock_code, body)
+        try:
+            stock_code = command.split('=')[1].upper()
+            body = stock_rpc_client.call(stock_code)
+            body = stock_response(stock_code, body)
+        except:
+            body = stock_response(stock_code, 'error')
     else:
         body = 'Invalid command. Check that it matches the syntax "/stock=stock_code"'
     response = {'username': 'Bot', 'body': body}
