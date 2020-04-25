@@ -10,7 +10,7 @@ def test_chatroom_name_is_unique():
     1. Try to add a new Test Chatroom
     2. Check if IntegrityError is raised
     """
-    chatroom = Chatroom(chatroom_name="Test chatroom")
+    chatroom = Chatroom(chatroom_name='Test chatroom')
     with pytest.raises(IntegrityError):
         db.session.add(chatroom)
         db.session.commit()
