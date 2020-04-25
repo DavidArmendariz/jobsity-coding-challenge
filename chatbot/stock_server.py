@@ -4,7 +4,7 @@ import time
 
 
 def on_request(ch, method, props, body):
-    response = fetch_stock(body)
+    response = fetch_stock(body.decode('utf-8'))
     ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(

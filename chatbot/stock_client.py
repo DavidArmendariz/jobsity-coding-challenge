@@ -1,5 +1,6 @@
 import pika
 import uuid
+from chatbot.validations import active_consumers
 
 
 class StockRPCClient:
@@ -20,9 +21,11 @@ class StockRPCClient:
 
     def on_response(self, ch, method, props, body):
         if self.correlation_id == props.correlation_id:
-            self.response = body
+            self.response = body.decode('utf-8')
 
     def call(self, stock):
+        if not active_consumers():
+            return 'error'
         self.response = None
         self.correlation_id = str(uuid.uuid4())
         self.channel.basic_publish(
@@ -35,4 +38,4 @@ class StockRPCClient:
             body=stock)
         while self.response is None:
             self.connection.process_data_events()
-        return self.response.decode('utf-8')
+        return self.response
