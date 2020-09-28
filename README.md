@@ -1,4 +1,4 @@
-# Jobsity coding challenge
+# Python Chatbot
 
 ## First steps
 
@@ -45,6 +45,7 @@ db.session.commit()
 ## Tests
 
 To run all the available tests, just run:
+
 ```
 pytest
 ```
